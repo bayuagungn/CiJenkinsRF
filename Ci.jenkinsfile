@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+    stages {
+        stage('SCM Clone') {
+            steps {
+                git branch: 'main', url: "https://github.com/bayuagungn/CiJenkinsRF.git"
+            }
+        }
+
+        stage('Run Automation') {
+            steps {
+                script {
+                    echo "Executing Robot Tests..."
+                    
+                    // Run the Robot Framework test
+                    bat  'robot -d result .\\testcase\\01.LoginPage.robot'
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            // `onlyCritical: false` is for RF 3.x compatibility. This will be deprecated
+            // and removed in the future.
+            robot outputPath:'\\result', passThreshold: 80.0, unstableThreshold: 70.0, onlyCritical: false
+        }
+    }
+}
